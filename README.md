@@ -1,3 +1,3 @@
 # nodejs-hw-mongodb
 
-🟢 Node.js | MongoDB | Homework#2 🟢
+🟢 Node.js | MongoDB | Homework 🟢
