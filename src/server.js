@@ -26,9 +26,6 @@ export const startServer = () => {
     }),
   );
 
-  app.get('/contacts');
-  app.get('/contacts/:contactId');
-
   app.use(contactsRouter); // Yönlendiriciyi app'e middleware olarak ekliyoruz
 
   app.use('*all', notFoundHandler);
