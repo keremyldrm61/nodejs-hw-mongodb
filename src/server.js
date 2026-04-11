@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 
-import contactsRouter from './routers/contacts.js';
+import router from './routers/index.js';
 
 import { env } from './utils/env.js';
 
@@ -26,7 +26,9 @@ export const startServer = () => {
     }),
   );
 
-  app.use(contactsRouter); // Yönlendiriciyi app'e middleware olarak ekliyoruz
+  // Yönlendiricilerin sunucumuza bağlanmasını güncellemek için
+  // import ve bağlantı güncellendi
+  app.use(router);
 
   app.use('*all', notFoundHandler);
 

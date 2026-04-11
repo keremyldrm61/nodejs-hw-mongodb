@@ -29,8 +29,10 @@ router.get(
   ctrlWrapper(getContactByIdController),
 );
 
+// "/contacts" yolunu ayrı bir yönlendiriciye taşıdıktan sonra,
+// ana yönlendirici dosyasına "/register" eklendi
 router.post(
-  '/contacts',
+  '/register',
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
