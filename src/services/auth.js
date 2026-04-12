@@ -1,7 +1,10 @@
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
 
+import { randomBytes } from 'crypto';
+import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/index.js';
 import { UsersCollection } from '../db/models/user.js';
+import { SessionsCollection } from '../db/models/session.js';
 
 // Kullanıcı kaydı için registerUser fonksiyonu
 export const registerUser = async (payload) => {
@@ -20,7 +23,7 @@ export const registerUser = async (payload) => {
   });
 };
 
-// Kullanıcı girişi için loginUser fornksiyonu
+// Kullanıcı girişi ve oturum oluşturmak için loginUser fonksiyonu
 export const loginUser = async (payload) => {
   // E-posta ile kullanıcıyı veritabanında ara
   const user = await UsersCollection.findOne({ email: payload.email });
@@ -36,4 +39,20 @@ export const loginUser = async (payload) => {
   if (!isEqual) {
     throw createHttpError(401, 'Unauthorized');
   }
+
+  // Kullanıcının eski oturumunu sil (varsa)
+  await SessionsCollection.deleteOne({ userId: user._id });
+
+  // Rastgele access ve refresh token oluştur
+  const accessToken = randomBytes(30).toString('base64');
+  const refreshToken = randomBytes(30).toString('base64');
+
+  // Yeni oturum oluştur ve döndür
+  return await SessionsCollection.create({
+    userId: user._id,
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+  });
 };

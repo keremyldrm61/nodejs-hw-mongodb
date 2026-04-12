@@ -1,9 +1,11 @@
 import { model, Schema } from 'mongoose';
 
+// Kullanıcı oturumlarını yönetmek için Session modeli
 const sessionsSchema = new Schema(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'users', // User modeliyle ilişki
       required: true,
     },
     accessToken: {
