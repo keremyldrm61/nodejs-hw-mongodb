@@ -1,5 +1,7 @@
 import { loginUser, registerUser } from '../services/auth.js';
 
+import { ONE_DAY } from '../constants/index.js';
+
 // Kullanıcı kaydı için controller
 export const registerUserController = async (req, res) => {
   // Yeni kullanıcıyı oluştur
@@ -15,6 +17,27 @@ export const registerUserController = async (req, res) => {
 
 // Kullanıcı girişi için controller
 export const loginUserController = async (req, res) => {
-  // Kullanıcı doğrulamasını yap
-  await loginUser(req.body);
+  // Kullanıcı doğrulaması yap ve oturum oluştur
+  const session = await loginUser(req.body);
+
+  // Refresh token'ı httpOnly cookie olarak sakla
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+
+  // Session ID'yi httpOnly cookie olarak sakla
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+
+  // Access token'ı response body'de döndür
+  res.json({
+    status: 200,
+    message: 'Successfully logged in a user!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
 };
