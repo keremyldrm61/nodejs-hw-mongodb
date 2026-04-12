@@ -1,4 +1,4 @@
-import { loginUser, registerUser } from '../services/auth.js';
+import { loginUser, logoutUser, registerUser } from '../services/auth.js';
 
 import { ONE_DAY } from '../constants/index.js';
 
@@ -40,4 +40,19 @@ export const loginUserController = async (req, res) => {
       accessToken: session.accessToken,
     },
   });
+};
+
+// Kullanıcı çıkışı için controller
+export const logoutUserController = async (req, res) => {
+  // Session ID varsa oturumu veritabanından sil
+  if (req.cookies.sessionId) {
+    await logoutUser(req.cookies.sessionId);
+  }
+
+  // Cookie'leri temizle
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
+
+  // 204 No Content yanıtı döndür
+  res.status(204).send();
 };
