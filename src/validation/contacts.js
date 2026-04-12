@@ -1,5 +1,6 @@
 import Joi from 'joi';
 
+// Contact oluşturma için doğrulama şeması
 export const createContactSchema = Joi.object({
   name: Joi.string().min(3).max(30).required().messages({
     'string.base': 'Name should be a string',
@@ -23,8 +24,10 @@ export const createContactSchema = Joi.object({
       'any.only': 'Contact type must be one of [work, home, personal]',
       'any.required': 'Contact type is required',
     }),
+  parentId: Joi.string().required(), // Kullanıcı ile ilişkilendirme için
 });
 
+// Contact güncelleme için doğrulama şeması
 export const updateContactSchema = Joi.object({
   name: Joi.string().min(3).max(30),
   phoneNumber: Joi.string().min(6).max(16),
