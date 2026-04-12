@@ -1,8 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import pino from 'pino-http';
 
-import contactsRouter from './routers/contacts.js';
+import router from './routers/index.js';
 
 import { env } from './utils/env.js';
 
@@ -15,9 +16,12 @@ const PORT = Number(env('PORT', '3000'));
 export const startServer = () => {
   const app = express();
 
-  app.use(express.json());
-  app.use(cors());
+  // Middleware'leri yapılandır
+  app.use(express.json()); // JSON body parser
+  app.use(cors()); // Cross-Origin Resource Sharing
+  app.use(cookieParser()); // Cookie yönetimi için
 
+  // HTTP isteklerini logla
   app.use(
     pino({
       transport: {
@@ -26,10 +30,13 @@ export const startServer = () => {
     }),
   );
 
-  app.use(contactsRouter); // Yönlendiriciyi app'e middleware olarak ekliyoruz
+  // Rotaları bağla
+  app.use(router);
 
+  // 404 hata yönetimi
   app.use('*all', notFoundHandler);
 
+  // Genel hata yönetimi
   app.use(errorHandler);
 
   app.listen(PORT, () => {
