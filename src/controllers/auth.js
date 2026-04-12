@@ -1,4 +1,9 @@
-import { loginUser, logoutUser, registerUser } from '../services/auth.js';
+import {
+  loginUser,
+  logoutUser,
+  refreshUsersSession,
+  registerUser,
+} from '../services/auth.js';
 
 import { ONE_DAY } from '../constants/index.js';
 
@@ -55,4 +60,39 @@ export const logoutUserController = async (req, res) => {
 
   // 204 No Content yanıtı döndür
   res.status(204).send();
+};
+
+// Cookie'lere session bilgilerini kaydet
+const setupSession = (res, session) => {
+  // Refresh token'ı httpOnly cookie olarak sakla
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+  // Session ID'yi httpOnly cookie olarak sakla
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+};
+
+// Kullanıcı oturumunu yenileme controller'ı
+export const refreshUserSessionController = async (req, res) => {
+  // Cookie'lerden session bilgilerini alarak oturumu yenile
+  const session = await refreshUsersSession({
+    sessionId: req.cookies.sessionId,
+    refreshToken: req.cookies.refreshToken,
+  });
+
+  // Yeni session bilgilerini cookie'lere kaydet
+  setupSession(res, session);
+
+  // Yeni access token'ı response'da döndür
+  res.json({
+    status: 200,
+    message: 'Successfully refreshed a session!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
 };

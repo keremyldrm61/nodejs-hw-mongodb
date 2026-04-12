@@ -61,3 +61,51 @@ export const loginUser = async (payload) => {
 export const logoutUser = async (sessionId) => {
   await SessionsCollection.deleteOne({ _id: sessionId });
 };
+
+// Yeni access ve refresh token çifti oluştur
+const createSession = () => {
+  const accessToken = randomBytes(30).toString('base64');
+  const refreshToken = randomBytes(30).toString('base64');
+
+  return {
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+  };
+};
+
+// Kullanıcı oturumunu yenile (refresh token rotasyonu)
+export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
+  // Mevcut oturumu sessionId ve refreshToken ile bul
+  const session = await SessionsCollection.findOne({
+    _id: sessionId,
+    refreshToken,
+  });
+
+  // Oturum bulunamazsa hata fırlat
+  if (!session) {
+    throw createHttpError(401, 'Session not found');
+  }
+
+  // Refresh token'ın süresinin dolup dolmadığını kontrol et
+  const isSessionTokenExpired =
+    new Date() > new Date(session.refreshTokenValidUntil);
+
+  // Token süresi dolmuşsa hata fırlat
+  if (isSessionTokenExpired) {
+    throw createHttpError(401, 'Session token expired');
+  }
+
+  // Yeni oturum verileri oluştur
+  const newSession = createSession();
+
+  // Eski oturumu sil
+  await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
+
+  // Yeni oturumu veritabanına kaydet ve döndür
+  return await SessionsCollection.create({
+    userId: session.userId,
+    ...newSession,
+  });
+};
