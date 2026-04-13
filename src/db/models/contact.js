@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
 
-// Contact modeli - kullanıcı ile ilişkilendirilmiş kişiler
+// Contact modeli - her contact bir kullanıcıya ait
 const contactsSchema = new Schema(
   {
     name: {
@@ -24,9 +24,10 @@ const contactsSchema = new Schema(
       required: true,
       default: 'personal',
     },
-    parentId: {
+    userId: {
       type: Schema.Types.ObjectId,
-      ref: 'users', // Kullanıcı ile ilişki
+      ref: 'users',
+      required: true, // Her contact mutlaka bir kullanıcıya ait olmalı
     },
   },
   {

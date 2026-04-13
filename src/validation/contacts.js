@@ -24,7 +24,6 @@ export const createContactSchema = Joi.object({
       'any.only': 'Contact type must be one of [work, home, personal]',
       'any.required': 'Contact type is required',
     }),
-  parentId: Joi.string().required(), // Kullanıcı ile ilişkilendirme için
 });
 
 // Contact güncelleme için doğrulama şeması
