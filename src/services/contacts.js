@@ -4,18 +4,19 @@ import { ContactsCollection } from '../db/models/contact.js';
 
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
-// Tüm iletişim bilgilerini almak için
+// Kullanıcının tüm contactlarını getir
 export const getAllContacts = async ({
   page = 1,
   perPage = 10,
   sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
   filter = {},
+  userId, // userId parametresi eklendi
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  const contactsQuery = ContactsCollection.find();
+  const contactsQuery = ContactsCollection.find({ userId }); // Sadece kullanıcının contactları
 
   if (filter.contactType) {
     contactsQuery.where('contactType').equals(filter.contactType);
@@ -25,7 +26,7 @@ export const getAllContacts = async ({
   }
 
   const [contactsCount, contacts] = await Promise.all([
-    ContactsCollection.find().merge(contactsQuery).countDocuments(),
+    ContactsCollection.find({ userId }).merge(contactsQuery).countDocuments(),
     contactsQuery
       .skip(skip)
       .limit(limit)
@@ -41,24 +42,30 @@ export const getAllContacts = async ({
   };
 };
 
-// GET | Id'ye göre iletişim bilgilerini almak için
-export const getContactById = async (contactId) => {
-  const contact = await ContactsCollection.findById(contactId);
+// GET | ID ile contact getir (sadece kendi contactı)
+export const getContactById = async (contactId, userId) => {
+  const contact = await ContactsCollection.findOne({
+    _id: contactId,
+    userId, // Kullanıcının kendi contactı olmalı
+  });
   return contact;
 };
 
-// POST | create contact
+// POST | Yeni contact oluştur
 export const createContact = async (payload) => {
-  const contact = await ContactsCollection.create(payload);
+  const contact = await ContactsCollection.create(payload); // payload'da userId var
   return contact;
 };
 
-// PATCH | update contact
-export const updateContact = async (contactId, payload, options = {}) => {
+// PATCH | Contact güncelle
+export const updateContact = async (
+  contactId,
+  userId, // userId parametresi
+  payload,
+  options = {},
+) => {
   const rawResult = await ContactsCollection.findOneAndUpdate(
-    {
-      _id: contactId,
-    },
+    { _id: contactId, userId }, // Sadece kendi contactı güncelleyebilir
     payload,
     {
       new: true,
@@ -75,10 +82,11 @@ export const updateContact = async (contactId, payload, options = {}) => {
   };
 };
 
-// DELETE | delete contact
-export const deleteContact = async (contactId) => {
+// DELETE | Contact sil
+export const deleteContact = async (contactId, userId) => {
   const contact = await ContactsCollection.findOneAndDelete({
     _id: contactId,
+    userId, // Sadece kendi contactını silebilir
   });
 
   return contact;

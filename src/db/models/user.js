@@ -1,8 +1,6 @@
 import { model, Schema } from 'mongoose';
 
-import { ROLES } from '../../constants/index.js';
-
-// User modeli - rol tabanlı yetkilendirme ile
+// User modeli - basit kullanıcı sistemi
 
 const usersSchema = new Schema(
   {
@@ -18,11 +16,6 @@ const usersSchema = new Schema(
     password: {
       type: String,
       required: true,
-    },
-    role: {
-      type: String,
-      enum: [ROLES.ADMIN, ROLES.USER], // Admin veya User
-      default: ROLES.USER, // Varsayılan rol: user
     },
   },
   {
