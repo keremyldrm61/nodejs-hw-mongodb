@@ -3,6 +3,7 @@ import {
   logoutUser,
   refreshUsersSession,
   registerUser,
+  requestResetToken,
 } from '../services/auth.js';
 
 import { ONE_DAY } from '../constants/index.js';
@@ -94,5 +95,18 @@ export const refreshUserSessionController = async (req, res) => {
     data: {
       accessToken: session.accessToken,
     },
+  });
+};
+
+// Şifre sıfırlama e-postası isteği controller'ı
+export const requestResetEmailController = async (req, res) => {
+  // Request body'den email'i al ve reset token oluştur
+  await requestResetToken(req.body.email);
+
+  // Kullanıcıya e-posta gönderildiğini bildiren başarılı yanıt döndür
+  res.json({
+    status: 200,
+    message: 'Reset password email was successfully sent!',
+    data: {},
   });
 };

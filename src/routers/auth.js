@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
-import { loginUserSchema, registerUserSchema } from '../validation/auth.js';
+import {
+  loginUserSchema,
+  registerUserSchema,
+  requestResetEmailSchema,
+} from '../validation/auth.js';
 import {
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
   registerUserController,
+  requestResetEmailController,
 } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
 
@@ -31,5 +36,12 @@ router.post('/logout', ctrlWrapper(logoutUserController));
 
 // Oturum yenileme rotası (refresh token ile yeni access token al)
 router.post('/refresh', ctrlWrapper(refreshUserSessionController));
+
+// Şifre sıfırlama e-postası gönderme rotası
+router.post(
+  '/request-reset-email',
+  validateBody(requestResetEmailSchema), // E-posta adresini doğrula
+  ctrlWrapper(requestResetEmailController), // controller'ı çalıştır
+);
 
 export default router;

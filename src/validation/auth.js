@@ -12,3 +12,8 @@ export const loginUserSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).max(36).required(),
 });
+
+// Şifre sıfırlama e-postası isteği için doğrulama şeması
+export const requestResetEmailSchema = Joi.object({
+  email: Joi.string().email().required(),
+});

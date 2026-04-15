@@ -109,3 +109,16 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
     ...newSession,
   });
 };
+
+// Şifre sıfırlama token'ı oluştur ve e-posta gönder
+export const requestResetToken = async (email) => {
+  // E-posta ile kullanıcıyı bul
+  const user = await UsersCollection.findOne({ email });
+
+  // Kullanıcı bulunamazsa 404 hatası fırlat
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  // Şifre sıfırlama token'ı oluşturulacak ve e-posta gönderilecek (sonraki adımlarda)
+};
