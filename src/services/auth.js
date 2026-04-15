@@ -1,8 +1,14 @@
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
 
+import jwt from 'jsonwebtoken';
+
+import { SMTP } from '../constants/index.js';
+import { env } from '../utils/env.js';
+import { sendEmail } from '../utils/sendMail.js';
+
 import { randomBytes } from 'crypto';
-import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/index.js';
+import { FIVE_MINUTES, FIFTEEN_MINUTES, ONE_DAY } from '../constants/index.js';
 import { UsersCollection } from '../db/models/user.js';
 import { SessionsCollection } from '../db/models/session.js';
 
@@ -120,5 +126,25 @@ export const requestResetToken = async (email) => {
     throw createHttpError(404, 'User not found');
   }
 
-  // Şifre sıfırlama token'ı oluşturulacak ve e-posta gönderilecek (sonraki adımlarda)
+  // JWT reset token oluştur (5 dakika geçerli)
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    env('JWT_SECRET'),
+    {
+      expiresIn: FIVE_MINUTES,
+    },
+  );
+
+  // Şifre sıfırlama bağlantısı içeren e-posta gönder
+  await sendEmail({
+    from: env(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Reset your password',
+    html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+  });
 };
+
+// Şu anki hali sadece token'ı gönderiyor, bu production için uygun değil!
