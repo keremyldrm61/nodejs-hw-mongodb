@@ -176,3 +176,37 @@ export const requestResetToken = async (email) => {
     html,
   });
 };
+
+// JWT token ile şifre sıfırlama işlemini gerçekleştir
+export const resetPassword = async (payload) => {
+  let entries;
+
+  try {
+    // JWT token'ı doğrula ve içeriğini çöz
+    entries = jwt.verify(payload.token, env('JWT_SECRET'));
+  } catch (err) {
+    // Token geçersiz veya süresi dolmuşsa hata fırlat
+    if (err instanceof Error) throw createHttpError(401, err.message);
+    throw err;
+  }
+
+  // Token içindeki kullanıcı ID ve e-posta ile kullanıcı bul
+  const user = await UsersCollection.findOne({
+    _id: entries.sub,
+    email: entries.email,
+  });
+
+  // Kullanıcı bulunamazsa hata fırlat
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  // Yeni şifreyi bcrypt ile hashle
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
+
+  // Kullanıcının şifresini güncelle
+  await UsersCollection.updateOne(
+    { _id: user._id },
+    { password: encryptedPassword },
+  );
+};

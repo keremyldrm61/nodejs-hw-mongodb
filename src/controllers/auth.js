@@ -4,6 +4,7 @@ import {
   refreshUsersSession,
   registerUser,
   requestResetToken,
+  resetPassword,
 } from '../services/auth.js';
 
 import { ONE_DAY } from '../constants/index.js';
@@ -106,7 +107,20 @@ export const requestResetEmailController = async (req, res) => {
   // Kullanıcıya e-posta gönderildiğini bildiren başarılı yanıt döndür
   res.json({
     status: 200,
-    message: 'Reset password email was successfully sent!',
+    message: 'Reset password email has been successfully sent.',
+    data: {},
+  });
+};
+
+// Şifre sıfırlama controller'ı
+export const resetPasswordController = async (req, res) => {
+  // Token'ı doğrula ve şifreyi sıfırla
+  await resetPassword(req.body);
+
+  // Başarılı yanıt döndür
+  res.json({
+    status: 200,
+    message: 'Password has been successfully reset.',
     data: {},
   });
 };
