@@ -1,16 +1,26 @@
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
-
 import jwt from 'jsonwebtoken';
+
+import handlebars from 'handlebars';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+
+import { randomBytes } from 'crypto';
+
+import {
+  FIVE_MINUTES,
+  FIFTEEN_MINUTES,
+  ONE_DAY,
+  TEMPLATES_DIR,
+} from '../constants/index.js';
+
+import { UsersCollection } from '../db/models/user.js';
+import { SessionsCollection } from '../db/models/session.js';
 
 import { SMTP } from '../constants/index.js';
 import { env } from '../utils/env.js';
 import { sendEmail } from '../utils/sendMail.js';
-
-import { randomBytes } from 'crypto';
-import { FIVE_MINUTES, FIFTEEN_MINUTES, ONE_DAY } from '../constants/index.js';
-import { UsersCollection } from '../db/models/user.js';
-import { SessionsCollection } from '../db/models/session.js';
 
 // Kullanıcı kaydı için registerUser fonksiyonu
 export const registerUser = async (payload) => {
@@ -138,13 +148,31 @@ export const requestResetToken = async (email) => {
     },
   );
 
-  // Şifre sıfırlama bağlantısı içeren e-posta gönder
+  // Şifre sıfırlama e-posta şablonunun yolunu oluştur
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
+
+  // HTML şablon dosyasını oku
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+
+  // Handlebars şablonunu derle
+  const template = handlebars.compile(templateSource);
+
+  // Şablona değerleri ekleyerek HTML oluştur
+  const html = template({
+    name: user.name,
+    link: `${env('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+  });
+
+  // Oluşturulan HTML ile e-posta gönder
   await sendEmail({
     from: env(SMTP.SMTP_FROM),
     to: email,
     subject: 'Reset your password',
-    html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+    html,
   });
 };
-
-// Şu anki hali sadece token'ı gönderiyor, bu production için uygun değil!
