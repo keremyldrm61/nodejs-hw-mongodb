@@ -13,6 +13,7 @@ import {
 import { validateBody } from '../middlewares/validateBody.js';
 import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
+import { upload } from '../middlewares/multer.js';
 
 import {
   createContactSchema,
@@ -33,6 +34,7 @@ router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
 // Yeni contact oluştur (sadece admin)
 router.post(
   '/',
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
@@ -41,6 +43,7 @@ router.post(
 router.put(
   '/:contactId',
   isValidId,
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(upsertContactController),
 );
@@ -49,6 +52,7 @@ router.put(
 router.patch(
   '/:contactId',
   isValidId,
+  upload.single('photo'),
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );

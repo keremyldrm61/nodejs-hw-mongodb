@@ -11,6 +11,7 @@ import {
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 
 // GET | Kullanıcının tüm contactlarını getir
 export const getContactsController = async (req, res, next) => {
@@ -90,8 +91,24 @@ export const upsertContactController = async (req, res, next) => {
 // PATCH | Contact'ı güncelle
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
-  const result = await updateContact(contactId, req.user._id, req.body);
+  // Multer tarafından gelen dosya
+  const photo = req.file;
 
+  let photoUrl;
+
+  // Eğer fotoğraf yüklendiyse
+  if (photo) {
+    // Dosya kalıcı klasörü taşınır ve URL alınır
+    photoUrl = await saveFileToUploadDir(photo);
+  }
+
+  // Contact güncellenir (photo varsa eklenir)
+  const result = await updateContact(contactId, req.user._id, {
+    ...req.body,
+    photo: photoUrl,
+  });
+
+  // Contact bulunamazsa 404 hatası fırlatır
   if (!result) {
     next(createHttpError(404, 'Contact not found'));
     return;
