@@ -11,6 +11,10 @@ import {
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+
+import { env } from '../utils/env.js';
 
 // GET | Kullanıcının tüm contactlarını getir
 export const getContactsController = async (req, res, next) => {
@@ -90,8 +94,30 @@ export const upsertContactController = async (req, res, next) => {
 // PATCH | Contact'ı güncelle
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
-  const result = await updateContact(contactId, req.user._id, req.body);
+  // Multer tarafından gelen dosya
+  const photo = req.file;
 
+  let photoUrl;
+
+  // Fotoğraf yükleme işlemi (Feature Flag kontrolü ile)
+  // Environment variable'dan Cloudinary durumunu kontrol et
+  if (photo) {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      // Cloudinary aktifse: Bulut depolamaya yükle
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      // Cloudinary pasifse: Yerel sunucuya yükle
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+  }
+
+  // Contact güncellenir (photo varsa eklenir)
+  const result = await updateContact(contactId, req.user._id, {
+    ...req.body,
+    photo: photoUrl,
+  });
+
+  // Contact bulunamazsa 404 hatası fırlatır
   if (!result) {
     next(createHttpError(404, 'Contact not found'));
     return;

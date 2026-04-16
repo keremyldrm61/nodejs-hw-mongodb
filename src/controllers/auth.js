@@ -3,9 +3,25 @@ import {
   logoutUser,
   refreshUsersSession,
   registerUser,
+  requestResetToken,
+  resetPassword,
 } from '../services/auth.js';
 
 import { ONE_DAY } from '../constants/index.js';
+
+// Cookie'lere session bilgilerini kaydet
+const setupSession = (res, session) => {
+  // Refresh token'ı httpOnly cookie olarak sakla
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+  // Session ID'yi httpOnly cookie olarak sakla
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+};
 
 // Kullanıcı kaydı için controller
 export const registerUserController = async (req, res) => {
@@ -47,32 +63,29 @@ export const loginUserController = async (req, res) => {
   });
 };
 
-// Kullanıcı çıkışı için controller
-export const logoutUserController = async (req, res) => {
-  // Session ID varsa oturumu veritabanından sil
-  if (req.cookies.sessionId) {
-    await logoutUser(req.cookies.sessionId);
-  }
+// Şifre sıfırlama e-postası isteği controller'ı
+export const requestResetEmailController = async (req, res) => {
+  // Request body'den email'i al ve reset token oluştur
+  await requestResetToken(req.body.email);
 
-  // Cookie'leri temizle
-  res.clearCookie('sessionId');
-  res.clearCookie('refreshToken');
-
-  // 204 No Content yanıtı döndür
-  res.status(204).send();
+  // Kullanıcıya e-posta gönderildiğini bildiren başarılı yanıt döndür
+  res.json({
+    status: 200,
+    message: 'Reset password email has been successfully sent.',
+    data: {},
+  });
 };
 
-// Cookie'lere session bilgilerini kaydet
-const setupSession = (res, session) => {
-  // Refresh token'ı httpOnly cookie olarak sakla
-  res.cookie('refreshToken', session.refreshToken, {
-    httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY),
-  });
-  // Session ID'yi httpOnly cookie olarak sakla
-  res.cookie('sessionId', session._id, {
-    httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY),
+// Şifre sıfırlama controller'ı
+export const resetPasswordController = async (req, res) => {
+  // Token'ı doğrula ve şifreyi sıfırla
+  await resetPassword(req.body);
+
+  // Başarılı yanıt döndür
+  res.json({
+    status: 200,
+    message: 'Password has been successfully reset.',
+    data: {},
   });
 };
 
@@ -95,4 +108,19 @@ export const refreshUserSessionController = async (req, res) => {
       accessToken: session.accessToken,
     },
   });
+};
+
+// Kullanıcı çıkışı için controller
+export const logoutUserController = async (req, res) => {
+  // Session ID varsa oturumu veritabanından sil
+  if (req.cookies.sessionId) {
+    await logoutUser(req.cookies.sessionId);
+  }
+
+  // Cookie'leri temizle
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
+
+  // 204 No Content yanıtı döndür
+  res.status(204).send();
 };
