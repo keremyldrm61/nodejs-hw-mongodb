@@ -12,6 +12,9 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+
+import { env } from '../utils/env.js';
 
 // GET | Kullanıcının tüm contactlarını getir
 export const getContactsController = async (req, res, next) => {
@@ -96,10 +99,16 @@ export const patchContactController = async (req, res, next) => {
 
   let photoUrl;
 
-  // Eğer fotoğraf yüklendiyse
+  // Fotoğraf yükleme işlemi (Feature Flag kontrolü ile)
+  // Environment variable'dan Cloudinary durumunu kontrol et
   if (photo) {
-    // Dosya kalıcı klasörü taşınır ve URL alınır
-    photoUrl = await saveFileToUploadDir(photo);
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      // Cloudinary aktifse: Bulut depolamaya yükle
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      // Cloudinary pasifse: Yerel sunucuya yükle
+      photoUrl = await saveFileToUploadDir(photo);
+    }
   }
 
   // Contact güncellenir (photo varsa eklenir)
