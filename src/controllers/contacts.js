@@ -60,7 +60,28 @@ export const getContactByIdController = async (req, res, next) => {
 
 // POST | Yeni contact oluştur
 export const createContactController = async (req, res) => {
-  const contact = await createContact({ ...req.body, userId: req.user._id });
+  // Multer tarafından gelen dosya
+  const photo = req.file;
+
+  let photoUrl;
+
+  // Fotoğraf yükleme işlemi (Feature Flag kontrolü ile)
+  // Environment variable'dan Cloudinary durumunu kontrol et
+  if (photo) {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      // Cloudinary aktifse: Bulut depolamaya yükle
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      // Cloudinary pasifse: Yerel sunucuya yükle
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+  }
+
+  const contact = await createContact({
+    ...req.body,
+    userId: req.user._id,
+    photo: photoUrl,
+  });
 
   res.status(201).json({
     status: 201,
@@ -73,9 +94,34 @@ export const createContactController = async (req, res) => {
 export const upsertContactController = async (req, res, next) => {
   const { contactId } = req.params;
 
-  const result = await updateContact(contactId, req.user._id, req.body, {
-    upsert: true,
-  });
+  // Multer tarafından gelen dosya
+  const photo = req.file;
+
+  let photoUrl;
+
+  // Fotoğraf yükleme işlemi (Feature Flag kontrolü ile)
+  // Environment variable'dan Cloudinary durumunu kontrol et
+  if (photo) {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      // Cloudinary aktifse: Bulut depolamaya yükle
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      // Cloudinary pasifse: Yerel sunucuya yükle
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+  }
+
+  const result = await updateContact(
+    contactId,
+    req.user._id,
+    {
+      ...req.body,
+      photo: photoUrl,
+    },
+    {
+      upsert: true,
+    },
+  );
 
   if (!result) {
     next(createHttpError(404, 'Contact not found'));
@@ -94,6 +140,7 @@ export const upsertContactController = async (req, res, next) => {
 // PATCH | Contact'ı güncelle
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
+
   // Multer tarafından gelen dosya
   const photo = req.file;
 
