@@ -29,7 +29,9 @@ const contactsSchema = new Schema(
       ref: 'users',
       required: true, // Her contact mutlaka bir kullanıcıya ait olmalı
     },
-    photo: { type: String }, // Contact'a ait fotoğraf URL'i
+    photo: {
+      type: String,
+    }, // Contact'a ait fotoğraf URL'i
   },
   {
     timestamps: true,
