@@ -17,7 +17,7 @@ requestBody:
   description: Contact information to be updated (partial fields)
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
         type: object
         properties:
@@ -42,6 +42,9 @@ requestBody:
             enum: [work, home, personal]
             description: 'Category of the contact'
             example: 'work'
+          photo:
+            type: string
+            format: binary
 responses:
   '200':
     description: Contact successfully updated
