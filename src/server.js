@@ -10,6 +10,7 @@ import { env } from './utils/env.js';
 // Middlewares
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 import { UPLOAD_DIR } from './constants/index.js';
 
@@ -34,6 +35,9 @@ export const startServer = () => {
 
   // Upload edilen dosyaları statik olarak kullan
   app.use('/uploads', express.static(UPLOAD_DIR));
+
+  // Tarayıcı üzerinden /api-docs adresine gidildiğinde Swagger UI arayüzünü tetikler
+  app.use('/api-docs', swaggerDocs());
 
   // Rotaları bağla
   app.use(router);

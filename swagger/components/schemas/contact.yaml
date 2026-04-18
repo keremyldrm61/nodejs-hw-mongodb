@@ -1,0 +1,52 @@
+type: object
+required:
+  - name
+  - phoneNumber
+  - contactType
+properties:
+  _id:
+    description: 'The unique identifier for the contact (MongoDB ObjectId)'
+    type: string
+    example: 65e4decdd286b30065d54af9
+  name:
+    description: 'Full name of the contact'
+    type: string
+    example: 'John Doe'
+  phoneNumber:
+    description: "Contact's phone number"
+    type: string
+    example: '+905551234567'
+  email:
+    description: "Contact's email"
+    type: string
+    example: john@example.com
+  isFavourite:
+    description: 'Whether the contact is marked as favourite'
+    type: boolean
+    default: false
+    example: false
+  contactType:
+    description: 'Category of the contact'
+    type: string
+    enum: [work, home, personal]
+    default: personal
+    example: personal
+  userId:
+    description: 'The ID of the user who owns this contact'
+    type: string
+    example: 65e4decdd286b30065d54af9
+  photo:
+    description: "URL to the contact's photo"
+    type: string
+    format: uri
+    example: 'https://your-app-domain.onrender.com/uploads/1715856123456-avatar.jpg'
+  createdAt:
+    description: 'The timestamp when the contact was created'
+    type: string
+    format: date-time
+    example: '2026-01-01T00:00:00.000Z'
+  updatedAt:
+    description: 'The timestamp when the contact was last updated'
+    type: string
+    format: date-time
+    example: '2026-01-01T00:00:00.000Z'

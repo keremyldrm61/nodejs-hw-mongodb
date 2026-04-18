@@ -32,3 +32,7 @@ export const CLOUDINARY = {
   API_KEY: 'CLOUDINARY_API_KEY',
   API_SECRET: 'CLOUDINARY_API_SECRET',
 };
+
+// Swagger dokümantasyon dosyasının (bundle edilmiş JSON) fiziksel yolu
+// Redocly bundle komutu sonucunda 'docs/swagger.json' dosyası burada aranacaktır
+export const SWAGGER_PATH = path.join(process.cwd(), 'docs', 'swagger.json');

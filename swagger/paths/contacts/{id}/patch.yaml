@@ -1,0 +1,69 @@
+tags:
+  - Contacts
+summary: Update a contact
+operationId: patchContact
+description: Partially update information for a specific contact by its ID. Only the fields provided in the request body will be updated.
+security:
+  - bearerAuth: []
+parameters:
+  - name: id
+    in: path
+    required: true
+    description: The unique identifier of the contact to be updated
+    schema:
+      type: string
+      example: '65e4decdd286b30065d54af9'
+requestBody:
+  description: Contact information to be updated (partial fields)
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: 'Full name of the contact'
+            example: 'Jane Doe'
+          phoneNumber:
+            type: string
+            description: "Contact's phone number"
+            example: '+905559876543'
+          email:
+            type: string
+            description: "Contact's email address"
+            example: 'jane.doe@example.com'
+          isFavourite:
+            type: boolean
+            description: 'Mark the contact as favorite'
+            example: true
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            description: 'Category of the contact'
+            example: 'work'
+          photo:
+            type: string
+            format: binary
+responses:
+  '200':
+    description: Contact successfully updated
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Successfully patched a contact!
+            data:
+              $ref: '../../../components/schemas/contact.yaml'
+  '400':
+    $ref: '../../../components/responses/400.yaml'
+  '401':
+    $ref: '../../../components/responses/401.yaml'
+  '404':
+    $ref: '../../../components/responses/404.yaml'
