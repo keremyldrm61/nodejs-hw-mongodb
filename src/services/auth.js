@@ -13,12 +13,12 @@ import {
   FIFTEEN_MINUTES,
   ONE_DAY,
   TEMPLATES_DIR,
+  SMTP,
 } from '../constants/index.js';
 
 import { UsersCollection } from '../db/models/user.js';
 import { SessionsCollection } from '../db/models/session.js';
 
-import { SMTP } from '../constants/index.js';
 import { env } from '../utils/env.js';
 import { sendEmail } from '../utils/sendMail.js';
 
@@ -169,12 +169,19 @@ export const requestResetToken = async (email) => {
   });
 
   // Oluşturulan HTML ile e-posta gönder
-  await sendEmail({
-    from: env(SMTP.SMTP_FROM),
-    to: email,
-    subject: 'Reset your password',
-    html,
-  });
+  try {
+    await sendEmail({
+      from: env(SMTP.SMTP_FROM),
+      to: email,
+      subject: 'Reset your password',
+      html,
+    });
+  } catch {
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
 };
 
 // JWT token ile şifre sıfırlama işlemini gerçekleştir
@@ -209,4 +216,8 @@ export const resetPassword = async (payload) => {
     { _id: user._id },
     { password: encryptedPassword },
   );
+
+  // Şifre değiştirildiğinde kullanıcının mevcut oturumunu sil
+  // Güvenlik önlemi: Kullanıcı yeni şifresiyle tekrar giriş yapmalı
+  await SessionsCollection.deleteOne({ userId: user._id });
 };

@@ -25,13 +25,13 @@ const router = Router();
 // Tüm contact rotaları için kimlik doğrulama gerekli
 router.use(authenticate);
 
-// Tüm contactları getir (sadece admin)
+// Tüm contactları getir
 router.get('/', ctrlWrapper(getContactsController));
 
-// ID ile contact getir (admin veya contact sahibi)
+// ID ile contact getir
 router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
 
-// Yeni contact oluştur (sadece admin)
+// Yeni contact oluştur
 router.post(
   '/',
   upload.single('photo'),
@@ -39,7 +39,7 @@ router.post(
   ctrlWrapper(createContactController),
 );
 
-// Contact'ı tamamen güncelle (sadece admin)
+// Contact'ı tamamen güncelle
 router.put(
   '/:contactId',
   isValidId,
@@ -48,7 +48,7 @@ router.put(
   ctrlWrapper(upsertContactController),
 );
 
-// Contact'ı kısmen güncelle (admin veya contact sahibi)
+// Contact'ı kısmen güncelle
 router.patch(
   '/:contactId',
   isValidId,
@@ -57,7 +57,7 @@ router.patch(
   ctrlWrapper(patchContactController),
 );
 
-// Contact'ı sil (sadece admin)
+// Contact'ı sil
 router.delete('/:contactId', isValidId, ctrlWrapper(deleteContactController));
 
 export default router;
