@@ -8,7 +8,7 @@ export const SORT_ORDER = {
 // Token geçerlilik süreleri
 export const FIFTEEN_MINUTES = 15 * 60 * 1000; // 15 dakika (milisaniye)
 export const ONE_DAY = 24 * 60 * 60 * 1000; // 1 gün (milisaniye)
-export const FIVE_MINUTES = 5 * 60 * 1000; // 5 dakika (milisaniye) - JWT token için
+export const FIVE_MINUTES = 5 * 60; // 5 dakika (saniye) - JWT token için
 
 // SMTP e-posta yapılandırması için environment variable isimleri
 export const SMTP = {
