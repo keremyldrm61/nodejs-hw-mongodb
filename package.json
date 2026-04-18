@@ -5,6 +5,9 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
+    "build": "npm run build-docs",
+    "build-docs": "redocly bundle sample@v1 --ext json -o docs/swagger.json",
+    "preview-docs": "redocly build-docs sample@v1 -o docs/index.html",
     "lint": "eslint src/**/*.js",
     "start": "node ./src/index.js",
     "dev": "nodemon src/index.js",
@@ -23,6 +26,7 @@
   "homepage": "https://github.com/keremyldrm61/nodejs-hw-mongodb#readme",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@redocly/cli": "^2.28.1",
     "eslint": "^10.0.3",
     "globals": "^17.4.0",
     "nodemon": "^3.1.14",
